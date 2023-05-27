@@ -22,6 +22,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	SysFSCpuTests = true
+}
 func TestGetNodes(t *testing.T) {
 	//overwrite global variable
 	nodeDir = "./testdata/"
@@ -318,4 +321,74 @@ func TestGetDistancesFileIsMissing(t *testing.T) {
 	distances, err := sysFs.GetDistances("./testdata/node1")
 	assert.NotNil(t, err)
 	assert.Equal(t, "", distances)
+}
+
+func TestGetUniqueCPUPropertyCountOnPowerLPAR(t *testing.T) {
+	// Test on non-x86 (ppc64le).
+	origIsX86 := isX86
+	defer func() {
+		isX86 = origIsX86
+	}()
+	isX86 = false
+
+	count := GetUniqueCPUPropertyCount("./testdata_power_lpar/", CPUCoreID)
+	assert.Equal(t, 1, count)
+}
+
+func TestIsCpuOnlinePowerLPAR(t *testing.T) {
+	// Test on arch other than x86 (ppc64le).
+	origIsX86 := isX86
+	defer func() {
+		isX86 = origIsX86
+	}()
+	isX86 = false
+
+	sysFS := NewRealSysFs()
+	online := sysFS.IsCPUOnline("./testdata_power_lpar/cpu0")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu1")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu2")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu3")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu4")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu5")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu6")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu7")
+	assert.True(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu8")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu9")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu10")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu11")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu12")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu13")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu14")
+	assert.False(t, online)
+
+	online = sysFS.IsCPUOnline("./testdata_power_lpar/cpu15")
+	assert.False(t, online)
 }
